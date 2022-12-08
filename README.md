@@ -20,12 +20,12 @@ In other words, it's a kind of workshop where we code together "something" but w
 
 It's very simple, here is an outline of the process:
 
-* ~10 minutes: retrospective
-* ~10 minutes: decide on a topic for this session
-* 40 minutes or so: code together
-* 5-10 minutes: mid-session break to discuss how things are going
-* 40 minutes or so: code some more
-* 5 minutes: closing
+* ~10 minutes: Retrospective
+* ~10 minutes: Decide on a topic for this session
+* 40 minutes or so: Code together
+* 5-10 minutes: Mid-session break to discuss how things are going
+* 40 minutes or so: Code some more
+* 5 minutes: Closing
 
 The meat of the Dojo is the _coding_ part, of course, which usually follows one of the following patterns:
 
