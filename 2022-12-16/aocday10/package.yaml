@@ -59,3 +59,4 @@ tests:
     - aocday10
     - hspec
     - hspec-discover
+    - QuickCheck

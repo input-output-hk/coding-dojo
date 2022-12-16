@@ -1,26 +1,56 @@
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DerivingStrategies #-}
 module Day10Spec where
 
+import Test.Hspec.QuickCheck
 import Test.Hspec
+import Test.QuickCheck
 
 execute :: String -> Int
 execute _ = 42
 
-initialState :: Int
-initialState = 1
+data CpuState = CpuState { register :: Int, cycleCounter :: Int }
+  deriving stock (Show, Eq)
 
-interpret :: [a] -> Int -> Int
-interpret _ _ = initialState
+initialState :: CpuState
+initialState = CpuState{register = 1, cycleCounter = 0}
 
+interpret :: [Command] -> CpuState -> CpuState
+interpret (Noop:xs) cpuState@CpuState{cycleCounter} =
+  let newState = cpuState { cycleCounter = cycleCounter + 1 }
+      finalState = interpret xs newState
+  in finalState
+interpret _ state = state
+interpret [] state = state
+
+data Command = Noop | AddX Int
+  deriving stock (Show, Eq)
+ 
+instance Arbitrary Command where
+  arbitrary = oneof [ pure Noop, AddX <$> arbitrary ]
+
+newtype OnlyNoops = OnlyNoops { noops :: [Command] }
+   deriving newtype (Eq, Show)
+
+instance Arbitrary OnlyNoops where
+  arbitrary = OnlyNoops <$> listOf (pure Noop)
+  
+noopIncrementTheCycleCounter :: OnlyNoops -> Property
+noopIncrementTheCycleCounter (OnlyNoops cmds) =
+  let finalState = interpret cmds initialState
+      finalCounter = cycleCounter finalState
+  in finalCounter === length cmds
 
 spec :: Spec
 spec = do
   describe "Integration test"  $ do
     xit "evaluate sample program" $ do
-      execute testProgram `shouldBe` 13139
+      execute testProgram `shouldBe` 13140
   describe "Unit test" $ do
     it "empty program does not change initial state" $ do
       interpret [] initialState `shouldBe` initialState
-
+    prop "noop should imcreement the cycle counter 2" noopIncrementTheCycleCounter
 
 testProgram :: String
 testProgram = "addx 15\

@@ -57,7 +57,8 @@ test-suite aocday10-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aocday10
+      QuickCheck
+    , aocday10
     , base >=4.7 && <5
     , hspec
     , hspec-discover
