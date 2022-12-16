@@ -12,6 +12,11 @@ execute _ = 42
 
 data CpuState = CpuState { register :: Int, cycleCounter :: Int }
   deriving stock (Show, Eq)
+instance Arbitrary CpuState where
+  arbitrary = do
+    register <- arbitrary
+    (NonNegative cycleCounter) <- arbitrary
+    pure CpuState{register, cycleCounter}
 
 initialState :: CpuState
 initialState = CpuState{register = 1, cycleCounter = 0}
@@ -35,12 +40,13 @@ newtype OnlyNoops = OnlyNoops { noops :: [Command] }
 
 instance Arbitrary OnlyNoops where
   arbitrary = OnlyNoops <$> listOf (pure Noop)
-  
-noopIncrementTheCycleCounter :: OnlyNoops -> Property
-noopIncrementTheCycleCounter (OnlyNoops cmds) =
-  let finalState = interpret cmds initialState
+
+noopIncrementTheCycleCounter :: CpuState -> OnlyNoops -> Property
+noopIncrementTheCycleCounter cpuState (OnlyNoops cmds) =
+  let finalState = interpret cmds cpuState
       finalCounter = cycleCounter finalState
-  in finalCounter === length cmds
+  in finalCounter === cycleCounter cpuState + length cmds
+
 
 spec :: Spec
 spec = do
@@ -50,7 +56,8 @@ spec = do
   describe "Unit test" $ do
     it "empty program does not change initial state" $ do
       interpret [] initialState `shouldBe` initialState
-    prop "noop should imcreement the cycle counter 2" noopIncrementTheCycleCounter
+    prop "noop should increment they cycle counter" noopIncrementTheCycleCounter
+    --prop "noop should preserve the register value" nooo
 
 testProgram :: String
 testProgram = "addx 15\
