@@ -2,7 +2,7 @@
 
 ## Next Session
 
-**Date**:  December 16, 2022
+**Date**:  [December 16, 2022](./2022-12-16)
 
 ## Previous Sessions
 
