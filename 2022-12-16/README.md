@@ -2,6 +2,8 @@
 
 ## Next session
 
+[2023-01-06](../2023-01-16)
+
 ## Retrospective
 
 **There's been no retrospetive as this is the first session ever**
@@ -13,3 +15,5 @@ Proposals:
 | Exercise                                                      | Language | Dojo style |
 | --                                                            | --       | --         |
 | [Advent of Code Day 10](https://adventofcode.com/2022/day/10) | Haskell  | randori    |
+
+Selected exercise:  [Advent of Code Day 10](https://adventofcode.com/2022/day/10)

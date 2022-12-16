@@ -20,6 +20,7 @@ In other words, it's a kind of workshop where we code together "something" but w
 
 It's very simple, here is an outline of the process:
 
+* ~2 minutes: Next session
 * ~10 minutes: Retrospective
 * ~10 minutes: Decide on a topic for this session
 * 40 minutes or so: Code together
