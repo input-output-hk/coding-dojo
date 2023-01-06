@@ -1,4 +1,4 @@
-# 2022-12-16
+# 2023-01-06
 
 ## Next session
 
@@ -8,6 +8,6 @@
 
 Proposals:
 
-| Exercise                   | Language          | Dojo style      |
-| --                         | --                | --              |
-| an exercise with some link | choose a language | randori or kata |
+| Exercise                                                      | Language | Dojo style |
+| --                                                            | --       | --         |
+| [Advent of Code Day 12](https://adventofcode.com/2022/day/12) | Haskell  | randori    |
