@@ -8,6 +8,7 @@
 
 Proposals:
 
-| Exercise                                                      | Language | Dojo style |
-| --                                                            | --       | --         |
-| [Advent of Code Day 12](https://adventofcode.com/2022/day/12) | Haskell  | randori    |
+| Exercise                                                                               | Language | Dojo style |
+| --                                                                                     | --       | --         |
+| [Advent of Code Day 12](https://adventofcode.com/2022/day/12)                          | Haskell  | randori    |
+| _(A fragment of the)_ [Rules of Diplomacy](https://en.wikibooks.org/wiki/Diplomacy/Rule) | Plutus   | randori    |
