@@ -4,6 +4,7 @@ fn main() {
 
 enum Lambda {
     Num(i64),
+    Var(String),
     Empty,
 }
 
@@ -19,6 +20,7 @@ mod tests {
     fn format_lambda(lambda: Lambda) -> String {
         match lambda {
             Lambda::Empty => "".to_string(),
+            Lambda::Var(x) => x,
             Lambda::Num(x) => x.to_string(),
         }
     }
@@ -31,6 +33,10 @@ mod tests {
     quickcheck! {
         fn format_a_number(x: i64) -> bool {
             format_lambda(Lambda::Num(x)) == x.to_string()
+        }
+
+        fn format_a_var(x: String) -> bool {
+            format_lambda(Lambda::Var(x.clone())) == x
         }
     }
 }
