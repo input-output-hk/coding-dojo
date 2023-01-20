@@ -5,6 +5,8 @@ fn main() {
 enum Lambda {
     Num(i64),
     Var(String),
+    Ap(Box<Lambda>, Box<Lambda>),
+    Lam(String, Box<Lambda>),
     Empty,
 }
 
@@ -22,6 +24,8 @@ mod tests {
             Lambda::Empty => "".to_string(),
             Lambda::Var(x) => x,
             Lambda::Num(x) => x.to_string(),
+            Lambda::Ap(l1,l2) => format!("({} {})", format_lambda(*l1), format_lambda(*l2)),
+            Lambda::Lam(arg,body) => format!("(lambda ({}) {})", arg, format_lambda(*body))
         }
     }
 
@@ -39,6 +43,19 @@ mod tests {
             format_lambda(Lambda::Var(x.clone())) == x
         }
     }
+
+    #[test]
+    fn format_an_application() {
+        assert!(format_lambda(Lambda::Ap(Box::new(Lambda::Var("x".to_string())), 
+                                         Box::new(Lambda::Var("y".to_string())))) == "(x y)");
+    }
+
+    #[test]
+    fn format_a_lambda() {
+        assert!(format_lambda(Lambda::Lam("x".to_string(), 
+                                          Box::new(Lambda::Var("y".to_string())))) == "(lambda (x) y)");
+    }
+
 }
 
 // Acceptance
