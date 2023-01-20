@@ -2,7 +2,7 @@
 
 ## Next Session
 
-**Date**:  [January 6, 2023](./2023-01-06)
+**Date**:  [February 11, 2023](./2023-02-11)
 
 ## Previous Sessions
 
