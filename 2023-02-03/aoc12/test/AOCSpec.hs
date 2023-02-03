@@ -3,12 +3,14 @@ module AOCSpec where
 import AOC (distance)
 import Test.Hspec (Spec, describe, it, pending, shouldBe)
 
--- Sabqponm
--- abcryxxl
--- accszExk
--- acctuvwj
--- abdefghi
---
+testGrid =
+    [ "Sabqponm"
+    , "abcryxxl"
+    , "accszExk"
+    , "acctuvwj"
+    , "abdefghi"
+    ]
+
 -- result = 31 steps
 
 -- algo:
@@ -36,3 +38,9 @@ spec = do
             distance (3, 1, 'c') (1, 5, 'S') `shouldBe` 8
             distance (3, 1, 'y') (1, 7, 'E') `shouldBe` 9
             distance (3, 1, 'E') (1, 7, 'y') `shouldBe` 9
+
+    describe "allpossibleMoves" $ do
+        it "" $ do
+            pending
+
+-- allPossibleMoves (0,0) testGrid `shouldBe` [(1,0,'a'),(0,1,'a')]
