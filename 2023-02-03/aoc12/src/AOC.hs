@@ -7,4 +7,7 @@ distance (x, y, c) (x', y', c') =
     let z = case c of
             'S' -> 'a'
             _ -> c
-     in abs (x' - x) + abs (y - y') + abs (fromEnum z - fromEnum c')
+        z' = case c' of
+            'S' -> 'a'
+            _ -> c'
+     in abs (x' - x) + abs (y - y') + abs (fromEnum z - fromEnum z')
