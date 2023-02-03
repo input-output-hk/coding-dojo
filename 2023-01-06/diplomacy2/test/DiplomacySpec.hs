@@ -35,6 +35,7 @@ spec = do
         solve noOrders oob map `shouldBe` oob
 
     prop "solve a single move order on an non-empty oob and map" prop_solve_single_move_order
+    prop "multiple conflicting orders cancel themselves" pending -- prop_conflicting_moves_cancel_themselves
 
 newtype Oob = Oob [Position]
     deriving (Eq, Show)
