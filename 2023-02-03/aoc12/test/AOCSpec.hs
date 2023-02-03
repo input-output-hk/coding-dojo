@@ -7,6 +7,8 @@ import Test.Hspec (Spec, it, pending, shouldBe)
 -- accszExk
 -- acctuvwj
 -- abdefghi
+--
+-- result = 31 steps
 
 spec :: Spec
 spec = it "does something" $ 1 `shouldBe` 1
