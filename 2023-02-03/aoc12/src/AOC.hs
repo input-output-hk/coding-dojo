@@ -3,4 +3,4 @@ module AOC where
 type Position = (Int, Int, Char)
 
 distance :: Position -> Position -> Int
-distance _  _ = 1
+distance _ (x, _, _) = x
