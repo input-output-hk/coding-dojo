@@ -35,7 +35,6 @@ spec = do
         solve noOrders oob map `shouldBe` oob
 
     prop "solve a single move order on an non-empty oob and map" prop_solve_single_move_order
-    prop "multiple conflicting orders cancel themselves" prop_conflicting_moves_cancel_themselves
 
 newtype Oob = Oob [Position]
     deriving (Eq, Show)
@@ -63,7 +62,7 @@ prop_solve_single_move_order (Oob oob) =
             let oob' = solve [move] oob defaultMap
              in (cty, Army dest) `elem` oob'
                     && (cty, Army src) `notElem` oob'
-                        & counterexample ("new oob: " <> show oob')
+                    & counterexample ("new oob: " <> show oob')
 
 prop_conflicting_moves_cancel_themselves :: ConflictingMoves -> Property
 prop_conflicting_moves_cancel_themselves (ConflictingMoves oob move1 move2) =
