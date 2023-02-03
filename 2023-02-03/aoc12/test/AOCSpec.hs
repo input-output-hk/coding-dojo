@@ -26,3 +26,4 @@ spec = describe "distance" $ do
     it "between 2 positions" $ do
         distance (0, 0, 'a') (1, 0, 'a') `shouldBe` 1
         distance (0, 0, 'a') (2, 0, 'a') `shouldBe` 2
+        distance (1, 0, 'a') (4, 0, 'a') `shouldBe` 3
