@@ -1,6 +1,6 @@
 module AOCSpec where
 
-import Test.Hspec (Spec, it, pending, shouldBe)
+import Test.Hspec (Spec, describe, it, pending, shouldBe)
 
 -- Sabqponm
 -- abcryxxl
@@ -21,4 +21,8 @@ import Test.Hspec (Spec, it, pending, shouldBe)
 --    take a position and a move -> compute positiong and a move
 
 spec :: Spec
-spec = it "does something" $ 1 `shouldBe` 1
+spec = describe "distance" $ do
+    it "between 2 positions" $ do
+        pending
+
+-- distance (0,0,'a') (1,0,'a') `shouldBe` 1
