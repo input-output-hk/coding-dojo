@@ -11,3 +11,5 @@ distance (x, y, c) (x', y', c') =
         z = zIndex c
         z' = zIndex c'
      in abs (x' - x) + abs (y - y') + abs (fromEnum z - fromEnum z')
+
+type Position = (Int, Int)
