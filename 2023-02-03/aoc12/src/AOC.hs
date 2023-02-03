@@ -1,8 +1,8 @@
 module AOC where
 
-type Position = (Int, Int, Char)
+type Cell = (Int, Int, Char)
 
-distance :: Position -> Position -> Int
+distance :: Cell -> Cell -> Int
 distance (x, y, c) (x', y', c') =
     let zIndex char = case char of
             'S' -> 'a'
