@@ -1,7 +1,7 @@
 module AOCSpec where
 
 import AOC (allPossibleMoves, distance)
-import Test.Hspec (Spec, describe, it, pending, shouldBe)
+import Test.Hspec (Spec, describe, it, pending, shouldBe, shouldMatchList)
 
 testGrid =
     [ "Sabqponm"
@@ -41,4 +41,5 @@ spec = do
 
     describe "allpossibleMoves" $ do
         it "" $ do
-            allPossibleMoves (0, 0) testGrid `shouldBe` [(1, 0, 'a'), (0, 1, 'a')]
+            allPossibleMoves (0, 0) `shouldMatchList` [(1, 0), (0, 1)]
+            allPossibleMoves (1, 0) `shouldMatchList` [(0, 0), (1, 1), (2, 0)]
