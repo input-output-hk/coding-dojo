@@ -1,6 +1,6 @@
 module AOCSpec where
 
-import AOC (distance)
+import AOC (allPossibleMoves, distance)
 import Test.Hspec (Spec, describe, it, pending, shouldBe)
 
 testGrid =
@@ -41,6 +41,4 @@ spec = do
 
     describe "allpossibleMoves" $ do
         it "" $ do
-            pending
-
--- allPossibleMoves (0,0) testGrid `shouldBe` [(1,0,'a'),(0,1,'a')]
+            allPossibleMoves (0, 0) testGrid `shouldBe` [(1, 0, 'a'), (0, 1, 'a')]

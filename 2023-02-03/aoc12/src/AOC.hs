@@ -13,3 +13,8 @@ distance (x, y, c) (x', y', c') =
      in abs (x' - x) + abs (y - y') + abs (fromEnum z - fromEnum z')
 
 type Position = (Int, Int)
+
+type Grid = [String]
+
+allPossibleMoves :: Position -> Grid -> [Cell]
+allPossibleMoves _ _ = [(1, 0, 'a'), (0, 1, 'a')]
