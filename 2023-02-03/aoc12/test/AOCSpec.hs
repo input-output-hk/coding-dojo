@@ -1,5 +1,6 @@
 module AOCSpec where
 
+import AOC (distance)
 import Test.Hspec (Spec, describe, it, pending, shouldBe)
 
 -- Sabqponm
