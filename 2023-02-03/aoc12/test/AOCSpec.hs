@@ -28,3 +28,7 @@ spec = describe "distance" $ do
         distance (0, 0, 'a') (2, 0, 'a') `shouldBe` 2
         distance (1, 0, 'a') (4, 0, 'a') `shouldBe` 3
         distance (5, 0, 'a') (1, 0, 'a') `shouldBe` 4
+        distance (3, 0, 'a') (1, 3, 'a') `shouldBe` 5
+        distance (3, 1, 'a') (1, 5, 'a') `shouldBe` 6
+        distance (3, 1, 'a') (1, 5, 'b') `shouldBe` 7
+        distance (3, 1, 'S') (1, 5, 'c') `shouldBe` 8

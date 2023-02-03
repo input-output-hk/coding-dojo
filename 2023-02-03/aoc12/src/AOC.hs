@@ -3,4 +3,8 @@ module AOC where
 type Position = (Int, Int, Char)
 
 distance :: Position -> Position -> Int
-distance (x, y, z) (x', y', z') = abs (x' - x) + abs (y - y') + abs (fromEnum z - fromEnum z')
+distance (x, y, c) (x', y', c') =
+    let z = case c of
+            'S' -> 'a'
+            _ -> c
+     in abs (x' - x) + abs (y - y') + abs (fromEnum z - fromEnum c')
