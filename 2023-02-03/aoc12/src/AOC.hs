@@ -6,6 +6,7 @@ distance :: Position -> Position -> Int
 distance (x, y, c) (x', y', c') =
     let z = case c of
             'S' -> 'a'
+            'E' -> 'z'
             _ -> c
         z' = case c' of
             'S' -> 'a'
