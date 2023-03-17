@@ -2,7 +2,7 @@
 
 ## Next Session
 
-**Date**:  [March 10, 2023](./2023-03-10)
+**Date**:  [March 17, 2023](./2023-03-17)
 
 ## Previous Sessions
 
