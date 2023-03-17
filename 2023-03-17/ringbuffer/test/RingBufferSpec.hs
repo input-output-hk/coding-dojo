@@ -6,7 +6,7 @@ import Data.IORef (IORef, atomicModifyIORef, modifyIORef, newIORef, readIORef, w
 import GHC.Natural
 import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn)
 import Test.Hspec.QuickCheck (prop)
-import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll)
+import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll, (==>))
 import Test.QuickCheck.Monadic (assert, monadicIO, monitor, run)
 
 -- a "ring" buffer where you can:
@@ -18,22 +18,26 @@ spec :: Spec
 spec =
     prop "pushing an element then popping it gives back same element" pushPopIsIdempotence
 
-pushPopIsIdempotence :: Positive Integer -> Property
-pushPopIsIdempotence (Positive capacity) = forAll arbitrary $ \xs -> monadicIO $ do
-    ys <- run $ do
-        buffer <- newBuffer (fromInteger capacity)
-        traverse_ (push buffer) xs
-        replicateM (length xs) (pop buffer)
+pushPopIsIdempotence :: Property
+pushPopIsIdempotence =
+    forAll arbitrary $ \xs ->
+        forAll arbitrary $ \(Positive capacity) ->
+            capacity <= length xs ==> monadicIO $ do
+                ys <- run $ do
+                    buffer <- newBuffer (fromIntegral capacity)
+                    traverse_ (push buffer) xs
+                    replicateM (fromIntegral capacity) (pop buffer)
 
-    monitor $ counterexample $ "popped from buffer: " <> show ys
-    assert (xs == ys)
+                monitor $ counterexample $ "popped from buffer: " <> show ys
+                assert (take capacity xs == ys)
 
 pop :: RingBuffer -> IO Int
 pop (RingBuffer _ ref) = do
     atomicModifyIORef ref (\(x : xs) -> (xs, x))
 
 push :: RingBuffer -> Int -> IO ()
-push (RingBuffer _ xs) x = modifyIORef xs (<> [x])
+push (RingBuffer capacity ref) x =
+    modifyIORef ref $ \xs -> if length xs < fromIntegral capacity then xs <> [x] else xs
 
 data RingBuffer = RingBuffer Natural (IORef [Int])
 
