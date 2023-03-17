@@ -3,7 +3,7 @@ resource "google_compute_disk" "dojo-vm-image" {
   type  = "pd-ssd"
   zone  = "europe-west1-b"
   size  = 200
-  image = "iog-hydra-1663305161"
+  image = "iog-hydra-1637229888"
   labels = {
     environment = "dev"
   }

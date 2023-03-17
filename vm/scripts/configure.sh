@@ -5,10 +5,11 @@
 set -e
 
 # clone dotfiles from github
-git clone https://github.com/abailly-iohk/dotfiles ~/dotfiles
+[[ -d ~/dotfiles ]] || git clone https://github.com/abailly-iohk/dotfiles ~/dotfiles
 [[ -L ~/.emacs ]] || ln -s ~/dotfiles/.emacs ~/.emacs
 [[ -L ~/.tmux.conf ]] || ln -s ~/dotfiles/.tmux.conf ~/.tmux.conf
 [[ -L ~/.git-completion.sh ]] || ln -s ~/dotfiles/bash-completion.sh ~/.git-completion.sh
+[[ -d ~/coding-dojo ]] || git clone https://github.com/abailly-iohk/coding-dojo ~/coding-dojo
 
 cat > ~/.gitconfig <<EOF
 [user]
@@ -62,3 +63,6 @@ EOF
 
 # Workaround from https://github.com/NixOS/nixpkgs/issues/163374#issuecomment-1074389802
 env NIX_PATH="REPEAT=/dev/null" nix-env --upgrade
+
+# install latest GHCup
+curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
