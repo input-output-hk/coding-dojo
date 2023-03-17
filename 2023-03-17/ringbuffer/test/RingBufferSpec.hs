@@ -1,8 +1,11 @@
+{-# LANGUAGE LambdaCase #-}
+
 module RingBufferSpec where
 
 import Control.Monad (liftM, replicateM)
 import Data.Foldable (traverse_)
 import Data.IORef (IORef, atomicModifyIORef, modifyIORef, newIORef, readIORef, writeIORef)
+import Data.Maybe (catMaybes)
 import GHC.Natural
 import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn)
 import Test.Hspec.QuickCheck (prop)
@@ -15,7 +18,10 @@ import Test.QuickCheck.Monadic (assert, monadicIO, monitor, run)
 -- - fixed capacity in the queue
 
 spec :: Spec
-spec =
+spec = do
+    it "return nothing for pop of empty buffer" $ do
+        b <- newBuffer 0
+        pop b `shouldReturn` Nothing
     prop "pushing an element then popping it gives back same element" pushPopIsIdempotence
 
 pushPopIsIdempotence :: Property
@@ -29,11 +35,11 @@ pushPopIsIdempotence =
                     replicateM (fromIntegral capacity) (pop buffer)
 
                 monitor $ counterexample $ "popped from buffer: " <> show ys
-                assert (take capacity xs == ys)
+                assert (take capacity xs == catMaybes ys)
 
-pop :: RingBuffer -> IO Int
+pop :: RingBuffer -> IO (Maybe Int)
 pop (RingBuffer _ ref) = do
-    atomicModifyIORef ref (\(x : xs) -> (xs, x))
+    atomicModifyIORef ref (\case (x : xs) -> (xs, Just x); [] -> ([], Nothing))
 
 push :: RingBuffer -> Int -> IO ()
 push (RingBuffer capacity ref) x =
