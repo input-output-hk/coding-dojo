@@ -7,11 +7,12 @@ import Data.Foldable (traverse_)
 import Data.IORef (IORef, atomicModifyIORef, modifyIORef, newIORef, readIORef, writeIORef)
 import Data.List (tails)
 import Data.Maybe (catMaybes)
+import Data.Sequence (Seq (..))
 import GHC.Clock (getMonotonicTime)
 import GHC.Natural (Natural)
 import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn)
 import Test.Hspec.QuickCheck (prop)
-import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll, (==>))
+import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll, resize, (==>))
 import Test.QuickCheck.Monadic (assert, monadicIO, monitor, run)
 
 -- a "ring" buffer where you can:
@@ -32,17 +33,18 @@ spec = do
 
 bufferAccessTimeIsConstant :: Property
 bufferAccessTimeIsConstant =
-    forAll arbitrary $ \xs -> monadicIO $ do
-        let subs = tails xs
-        ys <- run $ forM subs $ \sublist -> do
-            buffer <- newBuffer (fromIntegral $ length sublist)
-            st <- getMonotonicTime
-            traverse_ (push buffer) sublist
-            replicateM (fromIntegral $ length sublist) (pop buffer)
-            end <- getMonotonicTime
-            pure (end - st)
+    forAll (resize 100 arbitrary) $ \xs -> monadicIO $ do
+        let subs = filter (not . null) $ tails xs
+        ys <- run $
+            forM subs $ \sublist -> do
+                buffer <- newBuffer (fromIntegral $ length sublist)
+                st <- getMonotonicTime
+                traverse_ (push buffer) sublist
+                replicateM (fromIntegral $ length sublist) (pop buffer)
+                end <- getMonotonicTime
+                pure (end - st)
 
-        monitor $ counterexample $ "popped from buffer: " <> show ys
+        monitor $ counterexample $ "popped from buffer: " <> show (map (* 1000000) ys)
         assert (all (uncurry (==)) $ zip ys (tail ys))
 
 pushPopIsIdempotence :: Property
@@ -59,17 +61,19 @@ pushPopIsIdempotence =
                 assert (take capacity xs == catMaybes ys)
 
 pop :: RingBuffer -> IO (Maybe Int)
-pop (RingBuffer _ ref) = do
-    atomicModifyIORef ref (\case (x : xs) -> (xs, Just x); [] -> ([], Nothing))
+pop (RingBuffer _ ref) =
+    atomicModifyIORef ref $ \case
+        (x :<| xs) -> (xs, Just x)
+        Empty -> (Empty, Nothing)
 
 push :: RingBuffer -> Int -> IO Bool
 push (RingBuffer capacity ref) x =
     atomicModifyIORef ref $ \xs ->
         if length xs < fromIntegral capacity
-            then (xs <> [x], True)
+            then (xs :|> x, True)
             else (xs, False)
 
-data RingBuffer = RingBuffer Natural (IORef [Int])
+data RingBuffer = RingBuffer !Natural !(IORef (Seq Int))
 
 newBuffer :: Natural -> IO RingBuffer
-newBuffer capacity = liftM (RingBuffer capacity) (newIORef [])
+newBuffer capacity = liftM (RingBuffer capacity) (newIORef mempty)
