@@ -6,7 +6,7 @@ import Control.Monad (liftM, replicateM)
 import Data.Foldable (traverse_)
 import Data.IORef (IORef, atomicModifyIORef, modifyIORef, newIORef, readIORef, writeIORef)
 import Data.Maybe (catMaybes)
-import GHC.Natural
+import GHC.Natural (Natural)
 import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn)
 import Test.Hspec.QuickCheck (prop)
 import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll, (==>))
@@ -22,6 +22,9 @@ spec = do
     it "return nothing for pop of empty buffer" $ do
         b <- newBuffer 0
         pop b `shouldReturn` Nothing
+    it "return False when pushing on full buffer" $ do
+        b <- newBuffer 0
+        push b 42 `shouldReturn` False
     prop "pushing an element then popping it gives back same element" pushPopIsIdempotence
 
 pushPopIsIdempotence :: Property
@@ -41,9 +44,12 @@ pop :: RingBuffer -> IO (Maybe Int)
 pop (RingBuffer _ ref) = do
     atomicModifyIORef ref (\case (x : xs) -> (xs, Just x); [] -> ([], Nothing))
 
-push :: RingBuffer -> Int -> IO ()
+push :: RingBuffer -> Int -> IO Bool
 push (RingBuffer capacity ref) x =
-    modifyIORef ref $ \xs -> if length xs < fromIntegral capacity then xs <> [x] else xs
+    atomicModifyIORef ref $ \xs ->
+        if length xs < fromIntegral capacity
+            then (xs <> [x], True)
+            else (xs, False)
 
 data RingBuffer = RingBuffer Natural (IORef [Int])
 
