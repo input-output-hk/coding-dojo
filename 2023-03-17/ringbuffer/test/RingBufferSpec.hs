@@ -1,11 +1,13 @@
 module RingBufferSpec where
 
-import Control.Monad (liftM)
-import Data.IORef (IORef, newIORef, readIORef, writeIORef)
+import Control.Monad (liftM, replicateM)
+import Data.Foldable (traverse_)
+import Data.IORef (IORef, atomicModifyIORef, modifyIORef, newIORef, readIORef, writeIORef)
+import GHC.Natural
 import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn)
 import Test.Hspec.QuickCheck (prop)
-import Test.QuickCheck (Property, arbitrary, forAll)
-import Test.QuickCheck.Monadic (assert, monadicIO, run)
+import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll)
+import Test.QuickCheck.Monadic (assert, monadicIO, monitor, run)
 
 -- a "ring" buffer where you can:
 -- - push an element to the tail if not full
@@ -16,22 +18,24 @@ spec :: Spec
 spec =
     prop "pushing an element then popping it gives back same element" pushPopIsIdempotence
 
-pushPopIsIdempotence :: Property
-pushPopIsIdempotence = forAll arbitrary $ \x -> monadicIO $ do
-    y <- run $ do
-        buffer <- newBuffer
-        push buffer x
-        pop buffer
+pushPopIsIdempotence :: Positive Integer -> Property
+pushPopIsIdempotence (Positive capacity) = forAll arbitrary $ \xs -> monadicIO $ do
+    ys <- run $ do
+        buffer <- newBuffer (fromInteger capacity)
+        traverse_ (push buffer) xs
+        replicateM (length xs) (pop buffer)
 
-    assert (x == y)
+    monitor $ counterexample $ "popped from buffer: " <> show ys
+    assert (xs == ys)
 
 pop :: RingBuffer -> IO Int
-pop (RingBuffer b) = readIORef b
+pop (RingBuffer _ ref) = do
+    atomicModifyIORef ref (\(x : xs) -> (xs, x))
 
 push :: RingBuffer -> Int -> IO ()
-push (RingBuffer b) x = writeIORef b x
+push (RingBuffer _ xs) x = modifyIORef xs (<> [x])
 
-data RingBuffer = RingBuffer (IORef Int)
+data RingBuffer = RingBuffer Natural (IORef [Int])
 
-newBuffer :: IO RingBuffer
-newBuffer = liftM RingBuffer (newIORef 0)
+newBuffer :: Natural -> IO RingBuffer
+newBuffer capacity = liftM (RingBuffer capacity) (newIORef [])
