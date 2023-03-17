@@ -2,10 +2,12 @@
 
 module RingBufferSpec where
 
-import Control.Monad (liftM, replicateM)
+import Control.Monad (forM, liftM, replicateM)
 import Data.Foldable (traverse_)
 import Data.IORef (IORef, atomicModifyIORef, modifyIORef, newIORef, readIORef, writeIORef)
+import Data.List (tails)
 import Data.Maybe (catMaybes)
+import GHC.Clock (getMonotonicTime)
 import GHC.Natural (Natural)
 import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn)
 import Test.Hspec.QuickCheck (prop)
@@ -26,6 +28,22 @@ spec = do
         b <- newBuffer 0
         push b 42 `shouldReturn` False
     prop "pushing an element then popping it gives back same element" pushPopIsIdempotence
+    prop "pushing and popping an element is in O(1)" bufferAccessTimeIsConstant
+
+bufferAccessTimeIsConstant :: Property
+bufferAccessTimeIsConstant =
+    forAll arbitrary $ \xs -> monadicIO $ do
+        let subs = tails xs
+        ys <- run $ forM subs $ \sublist -> do
+            buffer <- newBuffer (fromIntegral $ length sublist)
+            st <- getMonotonicTime
+            traverse_ (push buffer) sublist
+            replicateM (fromIntegral $ length sublist) (pop buffer)
+            end <- getMonotonicTime
+            pure (end - st)
+
+        monitor $ counterexample $ "popped from buffer: " <> show ys
+        assert (all (uncurry (==)) $ zip ys (tail ys))
 
 pushPopIsIdempotence :: Property
 pushPopIsIdempotence =
