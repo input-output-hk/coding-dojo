@@ -8,12 +8,16 @@ import Data.IORef (IORef, atomicModifyIORef, modifyIORef, newIORef, readIORef, w
 import Data.List (tails)
 import Data.Maybe (catMaybes)
 import Data.Sequence (Seq (..))
+import Data.Vector.Mutable (IOVector)
+import qualified Data.Vector.Mutable as Vector
 import GHC.Clock (getMonotonicTime)
 import GHC.Natural (Natural)
-import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn)
+import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn, describe)
 import Test.Hspec.QuickCheck (prop)
 import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll, resize, (==>))
 import Test.QuickCheck.Monadic (assert, monadicIO, monitor, run)
+import RingBuffer
+
 
 -- a "ring" buffer where you can:
 -- - push an element to the tail if not full
@@ -28,6 +32,11 @@ spec = do
     it "return False when pushing on full buffer" $ do
         b <- newBuffer 0
         push b 42 `shouldReturn` False
+
+    describe "isFull" $ do
+      prop "should be true given capacity is 0" $ \ first last ->
+        isFull 0 first last
+
     prop "pushing an element then popping it gives back same element" pushPopIsIdempotence
     prop "pushing and popping an element is in O(1)" bufferAccessTimeIsConstant
 
@@ -44,7 +53,7 @@ bufferAccessTimeIsConstant =
                 end <- getMonotonicTime
                 pure (end - st)
 
-        monitor $ counterexample $ "popped from buffer: " <> show (map (* 1000000) ys)
+        monitor $ counterexample $ "popping time: " <> show (map (* 1000000) ys)
         assert (all (uncurry (==)) $ zip ys (tail ys))
 
 pushPopIsIdempotence :: Property
@@ -57,23 +66,5 @@ pushPopIsIdempotence =
                     traverse_ (push buffer) xs
                     replicateM (fromIntegral capacity) (pop buffer)
 
-                monitor $ counterexample $ "popped from buffer: " <> show ys
+                monitor $ counterexample $ "popped: " <> show ys
                 assert (take capacity xs == catMaybes ys)
-
-pop :: RingBuffer -> IO (Maybe Int)
-pop (RingBuffer _ ref) =
-    atomicModifyIORef ref $ \case
-        (x :<| xs) -> (xs, Just x)
-        Empty -> (Empty, Nothing)
-
-push :: RingBuffer -> Int -> IO Bool
-push (RingBuffer capacity ref) x =
-    atomicModifyIORef ref $ \xs ->
-        if length xs < fromIntegral capacity
-            then (xs :|> x, True)
-            else (xs, False)
-
-data RingBuffer = RingBuffer !Natural !(IORef (Seq Int))
-
-newBuffer :: Natural -> IO RingBuffer
-newBuffer capacity = liftM (RingBuffer capacity) (newIORef mempty)
