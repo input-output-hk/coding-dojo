@@ -15,7 +15,7 @@ import GHC.Natural (Natural)
 import RingBuffer
 import Test.Hspec (Spec, describe, it, pending, shouldBe, shouldReturn)
 import Test.Hspec.QuickCheck (prop)
-import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll, resize, (==>), NonNegative (..))
+import Test.QuickCheck (NonNegative (..), Positive (..), Property, arbitrary, counterexample, forAll, resize, (==>))
 import Test.QuickCheck.Monadic (assert, monadicIO, monitor, run)
 
 -- a "ring" buffer where you can:
@@ -38,12 +38,12 @@ spec = do
             \(Positive capacity) ->
                 forAll arbitrary $ \(NonNegative first) ->
                     forAll arbitrary $ \(NonNegative last) ->
-                        last < first ==>
-                        isFull capacity first last == (first - last == capacity)
+                        last < first
+                            ==> isFull capacity first last == (first - last == capacity)
     describe "isEmpty" $ do
         prop "should be true given last equals first" $
             \(Positive capacity) (NonNegative idx) ->
-              isEmpty capacity idx idx
+                isEmpty capacity idx idx
 
     prop "pushing an element then popping it gives back same element" pushPopIsIdempotence
     prop "pushing and popping an element is in O(1)" bufferAccessTimeIsConstant
@@ -59,7 +59,7 @@ bufferAccessTimeIsConstant =
                 traverse_ (push buffer) sublist
                 replicateM (fromIntegral $ length sublist) (pop buffer)
                 end <- getMonotonicTime
-                pure (end - st)
+                pure ((end - st) / fromIntegral (length sublist))
 
         monitor $ counterexample $ "popping time: " <> show (map (* 1000000) ys)
         assert (all (uncurry (==)) $ zip ys (tail ys))

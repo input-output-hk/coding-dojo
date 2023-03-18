@@ -8,14 +8,12 @@ import Data.Maybe (catMaybes)
 import Data.Sequence (Seq (..))
 import Data.Vector.Mutable (IOVector)
 import qualified Data.Vector.Mutable as Vector
-import Debug.Trace (trace)
 import GHC.Clock (getMonotonicTime)
 import GHC.Natural (Natural)
 
 pop :: RingBuffer -> IO (Maybe Int)
 pop (RingBuffer capacity index ref) = do
     toPop <- atomicModifyIORef index $ \(first, last) ->
-        trace ("first=" <> show first <> ", last=" <> show last) $
             if isEmpty capacity first last
                 then ((first, last), Nothing)
                 else ((first, succ last), Just last)
@@ -28,7 +26,7 @@ push (RingBuffer capacity index ref) x = do
     (first, last) <- readIORef index
     if isFull capacity first last
         then pure False
-        else trace ("first=" <> show first <> ", last=" <> show last) $ do
+        else do
             writeIORef index (succ first, last)
             Vector.write ref (first `mod` capacity) x
             pure True
