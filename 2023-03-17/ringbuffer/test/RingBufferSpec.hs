@@ -12,12 +12,11 @@ import Data.Vector.Mutable (IOVector)
 import qualified Data.Vector.Mutable as Vector
 import GHC.Clock (getMonotonicTime)
 import GHC.Natural (Natural)
-import Test.Hspec (Spec, it, pending, shouldBe, shouldReturn, describe)
-import Test.Hspec.QuickCheck (prop)
-import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll, resize, (==>))
-import Test.QuickCheck.Monadic (assert, monadicIO, monitor, run)
 import RingBuffer
-
+import Test.Hspec (Spec, describe, it, pending, shouldBe, shouldReturn)
+import Test.Hspec.QuickCheck (prop)
+import Test.QuickCheck (Positive (..), Property, arbitrary, counterexample, forAll, resize, (==>), NonNegative (..))
+import Test.QuickCheck.Monadic (assert, monadicIO, monitor, run)
 
 -- a "ring" buffer where you can:
 -- - push an element to the tail if not full
@@ -34,8 +33,17 @@ spec = do
         push b 42 `shouldReturn` False
 
     describe "isFull" $ do
-      prop "should be true given capacity is 0" $ \ first last ->
-        isFull 0 first last
+        it "should be true given capacity, first and last is 0" $ isFull 0 0 0 `shouldBe` True
+        prop "should be false given capacity is non 0, last is lower than first, and first minus last is less than capacity" $
+            \(Positive capacity) ->
+                forAll arbitrary $ \(NonNegative first) ->
+                    forAll arbitrary $ \(NonNegative last) ->
+                        last < first ==>
+                        isFull capacity first last == (first - last == capacity)
+    describe "isEmpty" $ do
+        prop "should be true given last equals first" $
+            \(Positive capacity) (NonNegative idx) ->
+              isEmpty capacity idx idx
 
     prop "pushing an element then popping it gives back same element" pushPopIsIdempotence
     prop "pushing and popping an element is in O(1)" bufferAccessTimeIsConstant

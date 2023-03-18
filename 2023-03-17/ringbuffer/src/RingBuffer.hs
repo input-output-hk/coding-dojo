@@ -18,13 +18,10 @@ pop (RingBuffer capacity index ref) = do
         trace ("first=" <> show first <> ", last=" <> show last) $
             if isEmpty capacity first last
                 then ((first, last), Nothing)
-                else ((first, succ last `mod` capacity), Just last)
+                else ((first, succ last), Just last)
     case toPop of
         Nothing -> pure Nothing
-        Just ix -> Just <$> Vector.read ref ix
-
-isEmpty :: Int -> Int -> Int -> Bool
-isEmpty capacity first last = True
+        Just ix -> Just <$> Vector.read ref (ix `mod` capacity)
 
 push :: RingBuffer -> Int -> IO Bool
 push (RingBuffer capacity index ref) x = do
@@ -32,12 +29,16 @@ push (RingBuffer capacity index ref) x = do
     if isFull capacity first last
         then pure False
         else trace ("first=" <> show first <> ", last=" <> show last) $ do
-            writeIORef index (succ first `mod` capacity, last)
-            Vector.write ref first x
+            writeIORef index (succ first, last)
+            Vector.write ref (first `mod` capacity) x
             pure True
 
 isFull :: Int -> Int -> Int -> Bool
-isFull capacity first last = True
+isFull capacity first last =
+  first - last == capacity
+
+isEmpty :: Int -> Int -> Int -> Bool
+isEmpty capacity first last = first == last
 
 data RingBuffer = RingBuffer
     { -- |Capacity of the buffer
@@ -51,4 +52,4 @@ data RingBuffer = RingBuffer
 newBuffer :: Natural -> IO RingBuffer
 newBuffer capacity = do
     let cap = fromIntegral capacity
-    RingBuffer cap <$> newIORef (0, cap) <*> Vector.new cap
+    RingBuffer cap <$> newIORef (0, 0) <*> Vector.new cap
