@@ -1,26 +1,27 @@
+{-# LANGUAGE NumericUnderscores #-}
 module Main where
 
-import Control.Monad (replicateM, replicateM_)
+import Control.Monad (replicateM)
 import Criterion (bench, bgroup, whnfIO)
 import Criterion.Main (defaultMain)
 import Data.Foldable (traverse_)
-import RingBuffer (RingBuffer (capacity), newBuffer, pop, push)
+import RingBuffer (newBuffer, pop, push)
 import System.Random ()
 import System.Random.Stateful (randomRIO)
 import Data.Maybe (catMaybes)
 
 main :: IO ()
 main = do
-    [l1, l2, l3, l4, l5, l6] <-
+    [l1000, l10_000, l100_000] <-
         mapM
             randomList
-            [1, 10, 100, 1000, 10000, 100000]
+            [1000, 10_000, 100_000]
     defaultMain
         [ bgroup
-            "fences tests"
-            [ bench "Size 1000 Test" $ whnfIO $ pushAndPop l4
-            , bench "Size 10000 Test" $ whnfIO $ pushAndPop l5
-            , bench "Size 100000 Test" $ whnfIO $ pushAndPop l6
+            "Ring Buffer tests"
+            [ bench "Push/Pop 1000" $ whnfIO $ pushAndPop l1000
+            , bench "Push/Pop 10000" $ whnfIO $ pushAndPop l10_000
+            , bench "Push/Pop 100000" $ whnfIO $ pushAndPop l100_000
             ]
         ]
 
